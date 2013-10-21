@@ -1,0 +1,54 @@
+from clawpack.petclaw.solution import Solution
+#from petclaw.io.petsc import read_petsc
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pylab as pl
+import matplotlib.cm as cm
+from matplotlib import rc
+#rc('text', usetex=True)
+import numpy as np
+import os
+
+def plot_p(frame,slices_xlimits=None):
+    sol=Solution(frame,file_format='petsc',read_aux=False,path='./_output/_p/',file_prefix='claw_p')
+    x=sol.state.grid.x.centers; y=sol.state.grid.y.centers
+    mx=len(x); my=len(y)
+    
+    mp=sol.state.num_eqn    
+    yy,xx = np.meshgrid(y,x)
+
+    if frame < 10:
+        str_frame = "00"+str(frame)
+    elif frame < 100:
+        str_frame = "0"+str(frame)
+    else:
+        str_frame = str(frame)
+
+    for i in xrange(mp):
+        p=sol.state.q[i,:,:]
+        
+        #pl.figure(figsize=(8, 3))
+        #pl.pcolormesh(xx,yy,p,cmap=cm.OrRd)
+        #pl.pcolormesh(xx,yy,p,cmap=cm.Blues)
+        pl.pcolormesh(xx,yy,p,cmap=cm.RdBu_r)
+        pl.title("t= "+str(sol.state.t),fontsize=20)
+        #pl.xlabel('x',fontsize=20); pl.ylabel('y',fontsize=20)
+        pl.xticks(size=20); pl.yticks(size=20)
+        cb = pl.colorbar();
+        #pl.clim(colorbar_min,colorbar_max);
+        pl.clim(-0.3,0.3);
+        imaxes = pl.gca(); pl.axes(cb.ax)
+        pl.yticks(fontsize=20); pl.axes(imaxes)
+        pl.axis('equal')
+        pl.axis([np.min(x),np.max(x),np.min(y),np.max(y)])
+        pl.savefig('./_plots_to_paper/2D_diff-like_miss-matchZ_miss-matchC.png')
+        pl.close()
+           
+if __name__== "__main__":
+    if not os.path.exists('./_plots_to_paper'): os.mkdir('_plots_to_paper')
+    
+    print('**********************')
+    print('**********************')
+    print('Plotting p ...')
+    plot_p(frame=65)
+    

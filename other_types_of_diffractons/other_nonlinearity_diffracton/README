@@ -1,0 +1,16 @@
+*********************************************************************
+************** DIFFRACTON WITH DIFFERENT NONLINEARITY ***************
+*********************************************************************
+
+Code to generate the diffracton with different nonlinearity in 
+     section Other types of diffractons and diffracton-like waves.
+** Run the code psystem.py to create the data. This simulation is 
+   computationally expensive; therefore, we add the data required to 
+   generate the plots in the paper.
+   NOTE: To run this simulation one has to change the pyclaw file:
+   	 .../pyclaw/clawpack/riemann/src/rpn2_psystem.f90
+	 for the one attached in the current folder. Then rebuild 
+	 pyclaw.
+** Run plots_to_paper.py to generate the plots.
+
+*********************************************************************

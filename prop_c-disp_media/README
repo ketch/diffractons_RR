@@ -1,0 +1,29 @@
+*********************************************************************
+*************** 2D WAVE PROPAGATION IN PERIODIC MEDIA ***************
+*********************************************************************
+
+Code to generate the 2D simulations in section 2D wave propagation in
+     one-dimensionally-periodic media and animations.
+** There are 4 folders: het_matchC_linear, het_matchC_nonlinear, 
+   het_miss-matchC_linear and het_miss-matchC_nonlinear, 
+   for the different situations considered in this section. Within 
+   each folder there are two python files: stegoton.py and plot.py.
+** Run first stegoton.py and then plot.py for all four folders. This 
+   will generate the data and different plots for the stress and 
+   strain.
+   These simulations are computationally expensive; therefore, we add
+   the data required to generates the plots in the paper.
+** Run plots_to_paper.py to generate the plots in the mentioned 
+   section.
+** Run the script make_gifs and/or make_movs to generate animations. 
+   To make the animations one has to run stegoton.py first. 
+   The animations are placed within a folder called animations.
+   To generate these animations one has to install ImageMagick making 
+   sure the delegates GhostScript (to deal with eps files) and ffmpeg 
+   (to generate mov files) are previously installed. With homebrew all 
+   these can be installed by typing: 
+    	brew install ghostscript
+	brew install --force ffmpeg
+	brew install --force imagemagick
+
+*********************************************************************
