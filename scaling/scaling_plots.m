@@ -1,3 +1,6 @@
+if exist('u1')==0
+    load_data;
+end
 %Produce figures in section on scaling.
 iy = 16;
 
@@ -63,7 +66,7 @@ plot(xx4s(:,iy),sig4s(:,iy),'k','linewidth',1)
 plot(xx5s(:,iy),sig5s(:,iy),'g','linewidth',1)
 plot(xx6s(:,iy),sig6s(:,iy),'m','linewidth',1)
 yy = 1./a1*(sech(xx1s*1.5).^2);
-plot(xx1s,yy,':k','linewidth',2)
+plot(xx1s,yy,'--k','linewidth',2)
 set(1, 'Position', [50 50 800 300])
 set(gca,'fontsize',20)
 xlim([-3,3])
