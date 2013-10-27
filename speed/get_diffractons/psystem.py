@@ -5,15 +5,8 @@ import numpy as np
 import clawpack.petclaw as pyclaw
 
 # material parameters
-#E1=5./8;   p1=8./5
-#E2=5./2;   p2=2./5
-r=2.
-E1=(1+r)/(2*r); p1=(2*r)/(1+r)
-E2=(1+r)/2; p2=2/(1+r)
-
-Kh=2*E1*E2/(E1+E2)
-ph=2*p1*p2/(p1+p2)
-
+E1=5./8;   p1=8./5
+E2=5./2;   p2=2./5
 # interface parameters
 alphax=0.5; deltax=1000.0
 alphay=0.5; deltay=1.0
@@ -39,27 +32,6 @@ def qinit(state,A,x0,y0,varx,vary):
     #initial condition
     state.q[0,:,:]=np.where(linearity_mat==1,1,0)*s/E+np.where(linearity_mat==2,1,0)*np.log(s+1)/E
     state.q[1,:,:]=0; state.q[2,:,:]=0
-
-def qinit_shock(state,sigl,xs,rho_eff,K_eff):
-    r""" Set initial conditions for q."""
-    x =state.grid.x.centers; y =state.grid.y.centers
-    # Create meshgrid
-    [yy,xx]=np.meshgrid(y,x)
-    sig=sigl*(xx<=xs)
-
-    #parameters from aux
-    rho=state.aux[0,:,:]
-    K=state.aux[1,:,:]
-    #initial condition
-    state.q[0,:,:]=np.log(sig+1)/K
-    state.q[1,:,:]=-rho*np.sqrt(sig*np.log(sig+1)/(rho_eff*K_eff))
-    #state.q[1,:,:]=-rho*np.sqrt(sig*np.log(sig+1)/1)
-    state.q[2,:,:]=0#-state.q[0,:,:]*np.sqrt(p*E*(sig+1))
-
-    rhom = (p1+p2)/2
-    print "Seff with rhoh: " + str(np.sqrt(K_eff/rho_eff*sigl/np.log(sigl+1)))
-    print "Seff with rhom: " + str(np.sqrt(K_eff/rhom*sigl/np.log(sigl+1)))
-    #print "Ceff: " + str(np.sqrt(K_eff/rho_eff))
 
 def setaux(x,y):
     r"""Creates a matrix representing every grid cell in the domain, 
@@ -109,6 +81,9 @@ def setaux(x,y):
         aux[0,:,:]=Amp_p*fun+offset_p
         aux[1,:,:]=Amp_E*fun+offset_E
         aux[2,:,:]=linearity_mat1
+
+    print y
+    print aux[1,0,:]
     return aux
 
 def b4step(solver,state):
@@ -152,7 +127,7 @@ def gauge_pfunction(q,aux):
     return [p]
 
 def psystem2D(iplot=False,kernel_language='Fortran',htmlplot=False,
-              outdir='./_output',solver_type='classic',
+              outdir='./_output',solver_type='sharpclaw',
               disable_output=False):
 
     """
@@ -162,35 +137,35 @@ def psystem2D(iplot=False,kernel_language='Fortran',htmlplot=False,
     ######### MAIN PARAMETERS ##########
     ####################################
     # Domain
-    x_lower=0.0; x_upper=100.00
+    x_lower=0.0; x_upper=300.00
     y_lower=0.0; y_upper=1.0
     # cells per layer
-    Nx=16#32
-    Ny=64#128
+    Nx=32
+    Ny=128
     mx=(x_upper-x_lower)*Nx; my=(y_upper-y_lower)*Ny
     # Initial condition parameters
     A=1.
     x0=0.0 # Center of initial perturbation
     y0=0.25 # Center of initial perturbation
-    varx=5.0; vary=5.0 # Width of initial perturbation
+    varx=50.0; vary=5.0 # Width of initial perturbation
 
     # Boundary conditions
-    bc_x_lower=pyclaw.BC.wall; bc_x_upper=pyclaw.BC.wall
+    bc_x_lower=pyclaw.BC.wall; bc_x_upper=pyclaw.BC.extrap
     bc_y_lower=pyclaw.BC.periodic; bc_y_upper=pyclaw.BC.periodic
 
     #change x BCs to periodic
-    change_BCs=0
+    change_BCs=1
     t_change_BCs=50
 
     # Turning off 1st half of the domain. Useful in rect domains
-    turnZero_half_2D=0 #flag
+    turnZero_half_2D=1 #flag
     t_turnZero=50
     
-    tfinal = 15
-    num_output_times = 15
+    tfinal = 1500
+    num_output_times = 1500
 
     # restart options
-    restart_from_frame = None
+    restart_from_frame = 996
 
     if solver_type=='classic':
         solver = pyclaw.ClawSolver2D()
@@ -263,8 +238,7 @@ def psystem2D(iplot=False,kernel_language='Fortran',htmlplot=False,
         grid = state.grid
         state.aux = setaux(grid.x.centers,grid.y.centers)
         #Initial condition
-        #qinit(state,A,x0,y0,varx,vary)
-        qinit_shock(state,0.5,50.0,ph,Kh)
+        qinit(state,A,x0,y0,varx,vary)
 
         claw.solution = pyclaw.Solution(state,domain)
         claw.num_output_times = num_output_times
