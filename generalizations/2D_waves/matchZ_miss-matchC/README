@@ -1,0 +1,12 @@
+*********************************************************************
+************ GENERALIZATIONS: matched Z, mismatched C ***************
+*********************************************************************
+
+Code to generate the diffracton-like wave with matched Z and 
+     mismatched C in section Generalizations.
+** Run the code psystem.py to create the data. This simulation is 
+   computationally expensive; therefore, we add the data required to 
+   generate the plots in the paper.
+** Run plots_to_paper.py to generate the plots.
+
+*********************************************************************
