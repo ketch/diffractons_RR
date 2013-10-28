@@ -82,9 +82,6 @@ def setaux(x,y):
         #aux[0,:,:]=Amp_p*fun+offset_p
         aux[0,:,:]=1./aux[1,:,:]
         aux[2,:,:]=linearity_mat1
-
-    print y
-    print aux[1,0,:]
     return aux
 
 def b4step(solver,state):
@@ -177,7 +174,9 @@ def psystem2D(iplot=False,kernel_language='Fortran',htmlplot=False,
         raise Exception('Unrecognized value of kernel_language for 2D psystem')
 
     from clawpack import riemann
-    solver.rp = riemann.rp2_psystem
+    solver.rp = riemann.psystem_2D
+    import psystem_quadratic_2D
+    #solver.rp = psystem_quadratic_2D
 
     solver.num_waves = 2
     solver.limiters = pyclaw.limiters.tvd.superbee
