@@ -2,14 +2,13 @@
 # encoding: utf-8
 
 import numpy as np
-import clawpack.petclaw as pyclaw
 
 # material parameters
-E1=5./8;   p1=8./5
+E1=5./8;   p1=8/5.
 E2=5./2;   p2=2./5
 # interface parameters
-alphax=0.5; deltax=1000.0
-alphay=0.5; deltay=1.0
+alphax=0.5; deltax=1000.
+alphay=0.5; deltay=1.
 # Linearity parameters
 linearity_mat1=3; linearity_mat2=3
 # heterogeneity type
@@ -20,17 +19,16 @@ sharpness=10
 
 def qinit(state,A,x0,y0,varx,vary):
     r""" Set initial conditions for q."""
-    x =state.grid.x.centers; y =state.grid.y.centers
+    x =state.grid.x.center; y =state.grid.y.center
     # Create meshgrid
     [yy,xx]=np.meshgrid(y,x)
     #s=A*np.exp(-(xx-x0)**2/(2*varx)-(yy-y0)**2/(2*vary)) #sigma(@t=0)
     s=A*np.exp(-(xx-x0)**2/(2*varx));
-
     #parameters from aux
     linearity_mat=state.aux[2,:]
     E=state.aux[1,:]
     #initial condition
-    state.q[0,:,:]=np.where(linearity_mat==1,1,0)*s/E+np.where(linearity_mat==2,1,0)*np.log(s+1)/E
+    state.q[0,:,:]=np.where(linearity_mat==1,1,0)*s/E+np.where(linearity_mat==2,1,0)*np.log(s+1)/E+np.where(linearity_mat==3,1,0)*(np.sqrt(4*s+1)-1)/(2*E)
     state.q[1,:,:]=0; state.q[2,:,:]=0
 
 def setaux(x,y):
@@ -78,31 +76,35 @@ def setaux(x,y):
             for i in xrange(0,1+int(np.ceil((y[-1]-y[0])/(deltay*0.5)))):
                 fun_y=fun_y+(-1)**i*np.tanh(sharpness*(yy-deltay*i*0.5))
             fun=fun_x*fun_y
+        aux[0,:,:]=Amp_p*fun+offset_p
         aux[1,:,:]=Amp_E*fun+offset_E
-        #aux[0,:,:]=Amp_p*fun+offset_p
-        aux[0,:,:]=1./aux[1,:,:]
         aux[2,:,:]=linearity_mat1
     return aux
 
-def b4step(solver,state):
+def b4step(solver,solutions):
     r"""put in aux[3,:,:] the value of q[0,:,:] (eps). This is required in rptpv.f"""
+    state = solutions['n'].states[0]   
     state.aux[3,:,:] = state.q[0,:,:]
 
     # To set to 0 1st 1/2 of the domain. Used in rect domains with PBC in x
-    if state.problem_data['turnZero_half_2D']==1:
-        if state.t>=state.problem_data['t_turnZero'] and state.t<=state.problem_data['t_turnZero']+1:
-            Y,X = np.meshgrid(state.grid.y.centers,state.grid.x.centers)
-            state.q = state.q * (X>25) #state.grid.upper[0]/5) 
-            
-    if state.problem_data['change_BCs']==1:
-        if state.t>=state.problem_data['t_change_BCs']:
-            solver.bc_lower[0]=pyclaw.BC.periodic
-            solver.bc_upper[0]=pyclaw.BC.periodic
-            solver.aux_bc_lower[0]=pyclaw.BC.periodic
-            solver.aux_bc_upper[0]=pyclaw.BC.periodic
+    if state.aux_global['turnZero_half_2D']==1:
+        if state.t>=state.aux_global['t_turnZero'] and state.t<=state.aux_global['t_turnZero']+1:
+            if state.grid.x.nend <= np.floor(state.grid.x.n/2):
+                state.q[:,:,:]=0
 
+    import petclaw as pyclaw
+    if state.aux_global['change_BCs']==1:
+        if state.t>=state.aux_global['t_change_BCs']:
+            solver.mthbc_lower[0]=pyclaw.BC.periodic
+            solver.mthbc_upper[0]=pyclaw.BC.periodic
+            solver.mthauxbc_lower[0]=pyclaw.BC.periodic
+            solver.mthauxbc_upper[0]=pyclaw.BC.periodic
+            
 def compute_p(state):
-    state.p[0,:,:]=np.exp(state.q[0,:,:]*state.aux[1,:,:])-1
+    K= state.aux[1,:,:]
+    eps = state.q[0,:,:]
+    #state.p[0,:,:]=np.exp(state.q[0,:,:]*state.aux[1,:,:])-1
+    state.p[0,:,:]=K*eps+K**2*eps**2
 
 def compute_F(state):
     rho = state.aux[0,:,:]; E = state.aux[1,:,:]
@@ -117,149 +119,139 @@ def compute_F(state):
     sigma = np.exp(E*eps) - 1.
     sigint = (sigma-np.log(sigma+1.))/E
 
-    dx=state.grid.delta[0]; dy=state.grid.delta[1]
+    dx=state.grid.d[0]; dy=state.grid.d[1]
+    
     state.F[0,:,:] = (sigint+nrg)*dx*dy 
 
 def gauge_pfunction(q,aux):
     p = np.exp(q[0]*aux[1])-1
     return [p]
 
-def psystem2D(iplot=False,kernel_language='Fortran',htmlplot=False,
-              outdir='./_output',solver_type='classic',
-              disable_output=False):
+def gauges(radii,thetas):
+    gauges_list=[]
+    for radius in radii:
+        for theta in thetas: 
+            gauges_list.append([radius,theta])
+    return gauges_list
 
+def psystem2D(use_petsc=True,solver_type='classic',iplot=False,htmlplot=False):
     """
     Solve the p-system in 2D with variable coefficients
     """
+    if use_petsc:
+        import petclaw as pyclaw
+    else:
+        import pyclaw
+
     ####################################
     ######### MAIN PARAMETERS ##########
     ####################################
     # Domain
     x_lower=0.0; x_upper=100.00
     y_lower=0.0; y_upper=1.0
-    # cells per layer
+    # Grid cells per layer
     Nx=32
     Ny=128
     mx=(x_upper-x_lower)*Nx; my=(y_upper-y_lower)*Ny
     # Initial condition parameters
     A=1.
     x0=0.0 # Center of initial perturbation
-    y0=0.25 # Center of initial perturbation
+    y0=0.0 # Center of initial perturbation
     varx=5.0; vary=5.0 # Width of initial perturbation
-
     # Boundary conditions
-    bc_x_lower=pyclaw.BC.wall; bc_x_upper=pyclaw.BC.extrap
-    bc_y_lower=pyclaw.BC.periodic; bc_y_upper=pyclaw.BC.periodic
-
+    mthbc_x_lower=pyclaw.BC.reflecting; mthbc_x_upper=pyclaw.BC.outflow
+    mthbc_y_lower=pyclaw.BC.periodic; mthbc_y_upper=pyclaw.BC.periodic
+    # Turning off 1st half of the domain. Useful in rect domains
+    turnZero_half_2D=0 #flag
+    t_turnZero=50
     #change x BCs to periodic
     change_BCs=1
     t_change_BCs=50
-
-    # Turning off 1st half of the domain. Useful in rect domains
-    turnZero_half_2D=1 #flag
-    t_turnZero=50
-    
-    tfinal = 120
-    num_output_times = 120
-
+    # Regarding time
+    tfinal=120
+    nout=120
+    t0=0.0
     # restart options
     restart_from_frame = None
+    solver = pyclaw.ClawSolver2D()
+    #solver = pyclaw.SharpClawSolver2D()
+    solver.mwaves = 2
+    solver.limiters = pyclaw.limiters.tvd.MC
 
-    if solver_type=='classic':
-        solver = pyclaw.ClawSolver2D()
-    elif solver_type=='sharpclaw':
-        solver = pyclaw.SharpClawSolver2D()
-
-    if kernel_language != 'Fortran':
-        raise Exception('Unrecognized value of kernel_language for 2D psystem')
-
-    from clawpack import riemann
-    solver.rp = riemann.psystem_2D
-    import psystem_quadratic_2D
-    #solver.rp = psystem_quadratic_2D
-
-    solver.num_waves = 2
-    solver.limiters = pyclaw.limiters.tvd.superbee
-
-    solver.bc_lower[0]=bc_x_lower
-    solver.bc_upper[0]=bc_x_upper
-    solver.bc_lower[1]=bc_y_lower
-    solver.bc_upper[1]=bc_y_upper
-    solver.aux_bc_lower[0]=bc_x_lower
-    solver.aux_bc_upper[0]=bc_x_upper
-    solver.aux_bc_lower[1]=bc_y_lower
-    solver.aux_bc_upper[1]=bc_y_upper
+    solver.mthbc_lower[0]=mthbc_x_lower
+    solver.mthbc_upper[0]=mthbc_x_upper
+    solver.mthbc_lower[1]=mthbc_y_lower
+    solver.mthbc_upper[1]=mthbc_y_upper
+    solver.mthauxbc_lower[0]=mthbc_x_lower
+    solver.mthauxbc_upper[0]=mthbc_x_upper
+    solver.mthauxbc_lower[1]=mthbc_y_lower
+    solver.mthauxbc_upper[1]=mthbc_y_upper
 
     solver.fwave = True
-    solver.before_step = b4step
-    if solver_type=='classic':
-        solver.cfl_max = 0.45
-        solver.cfl_desired = 0.4
-        solver.dimensional_split=False
-    elif solver_type=='sharpclaw':
-        solver.cfl_max = 2.5
-        solver.cfl_desired = 2.45
-        
+    solver.cfl_max = 0.9
+    solver.cfl_desired = 0.8
+    solver.start_step = b4step
+    solver.dim_split=False
+
     #controller
     claw = pyclaw.Controller()
     claw.tfinal = tfinal
     claw.solver = solver
-    claw.outdir = outdir
-    claw.num_output_times = num_output_times
 
     if restart_from_frame is not None:
-        claw.solution = pyclaw.Solution(restart_from_frame, file_format='petsc',read_aux=False)
+        claw.solution = pyclaw.Solution(restart_from_frame, format='petsc',read_aux=False)
         claw.solution.state.mp = 1
         claw.solution.state.mF = 1
-        grid = claw.solution.domain.grid
-        claw.solution.state.aux = setaux(grid.x.centers,grid.y.centers)
-        #claw.num_output_times = num_output_times - restart_from_frame 
+        grid = claw.solution.grid
+        claw.solution.state.aux = setaux(grid.x.center,grid.y.center)
+        claw.nout = nout - restart_from_frame
         claw.start_frame = restart_from_frame
     else:
         ####################################
         ####################################
         ####################################
-        #Creation of Domain
+        #Creation of grid
         x = pyclaw.Dimension('x',x_lower,x_upper,mx)
         y = pyclaw.Dimension('y',y_lower,y_upper,my)
-        domain = pyclaw.Domain([x,y])
-        num_eqn = 3
-        num_aux = 4
-        state = pyclaw.State(domain,num_eqn,num_aux)
+        grid = pyclaw.Grid([x,y])
+        state = pyclaw.State(grid)
+        state.meqn = 3
         state.mF = 1
-        #Set global parameters
-        state.problem_data = {}
-        state.problem_data['turnZero_half_2D'] = turnZero_half_2D
-        state.problem_data['t_turnZero'] = t_turnZero
-        state.problem_data['change_BCs'] = change_BCs
-        state.problem_data['t_change_BCs'] = t_change_BCs
         state.mp = 1
+        state.t=t0
+        #Set global parameters
+        state.aux_global = {}
+        state.aux_global['turnZero_half_2D'] = turnZero_half_2D
+        state.aux_global['t_turnZero'] = t_turnZero
+        state.aux_global['change_BCs'] = change_BCs
+        state.aux_global['t_change_BCs'] = t_change_BCs
 
-        grid = state.grid
-        state.aux = setaux(grid.x.centers,grid.y.centers)
+        state.aux = setaux(grid.x.center,grid.y.center)
         #Initial condition
         qinit(state,A,x0,y0,varx,vary)
 
-        claw.solution = pyclaw.Solution(state,domain)
-        claw.num_output_times = num_output_times
+        claw.solution = pyclaw.Solution(state)
+        claw.nout = nout
 
     claw.compute_p = compute_p
-    if disable_output:
-        claw.output_format = None
-    claw.compute_F = compute_F
-    claw.solution.state.keep_gauges = True
-    claw.solution.state.grid.add_gauges([[25.0,0.75],[50.0,0.75],[75.0,0.75],[25.0,1.25],[50.0,1.25],[75.0,1.25]])
-    solver.compute_gauge_values = gauge_pfunction
-    claw.write_aux_init = False
+    #claw.compute_F = compute_F
+    #gauges_radii=[5,10,15]
+    #gauges_thetas=[0,15,30,45,60,75,90]
+    #grid.add_gauges(gauges(gauges_radii,gauges_thetas))
+    #solver.compute_gauge_values = gauge_pfunction
+    claw.write_aux_init = True
 
     #Solve
     status = claw.run()
+    
+    #strain=claw.frames[claw.nout].state.gqVec.getArray().reshape([grid.ng[0],grid.ng[1],state.meqn])[:,:,0]
+    #return strain
 
-    if iplot:    pyclaw.plot.interactive_plot()
-    if htmlplot: pyclaw.plot.html_plot()
-
-    return claw.solution.state
+    if iplot:    pyclaw.plot.plotInteractive()
+    if htmlplot: pyclaw.plot.plotHTML()
 
 if __name__=="__main__":
-    from clawpack.pyclaw.util import run_app_from_main
-    output = run_app_from_main(psystem2D)
+    import sys
+    from pyclaw.util import _info_from_argv
+    args, kwargs = _info_from_argv(sys.argv)
+    psystem2D(*args,**kwargs)
