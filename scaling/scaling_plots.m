@@ -4,7 +4,7 @@ end
 %Produce figures in section on scaling.
 iy = 16;
 
-a1=max(abs(u1(:,iy)));
+a1=max(abs(u1(:,iy))); 
 a2=max(abs(u2(:,iy)));
 a3=max(abs(u3(:,iy)));
 a4=max(abs(u4(:,iy)));
@@ -12,8 +12,8 @@ a5=max(abs(u5(:,iy)));
 a6=max(abs(u6(:,iy)));
 
 % x index of max point
-[~,x_im1]=max(sig1(:,iy)); [~,x_im2]=max(sig2(:,iy)); [~,x_im3]=max(sig3(:,iy)); 
-[~,x_im4]=max(sig4(:,iy)); [~,x_im5]=max(sig5(:,iy)); [~,x_im6]=max(sig6(:,iy));
+[dummy,x_im1]=max(sig1(:,iy)); [dummy,x_im2]=max(sig2(:,iy)); [dummy,x_im3]=max(sig3(:,iy)); 
+[dummy,x_im4]=max(sig4(:,iy)); [dummy,x_im5]=max(sig5(:,iy)); [dummy,x_im6]=max(sig6(:,iy));
 
 xm1=x(x_im1); xm2=x(x_im2); xm3=x(x_im3);
 xm4=x(x_im4); xm5=x(x_im5); xm6=x(x_im6);
@@ -56,6 +56,19 @@ xx3sb = a3*(xx-xm3);
 xx4sb = a4*(xx-xm4);
 xx5sb = a5*(xx-xm5);
 xx6sb = a6*(xx-xm6);
+
+%% Plot of A(y)'s 
+figure(4); clf; hold on
+y=linspace(0,1,length(u1(x_im1,:)));
+plot(y,abs(u1(x_im1,:)),'-b','linewidth',2)
+plot(y,abs(u2(x_im2,:)),'-r','linewidth',2)
+plot(y,abs(u3(x_im3,:)),'-c','linewidth',2)
+plot(y,abs(u4(x_im4,:)),'-k','linewidth',2)
+plot(y,abs(u5(x_im5,:)),'-g','linewidth',2)
+plot(y,abs(u6(x_im6,:)),'-m','linewidth',2)
+title('A(y)','fontsize',20)
+set(gcf, 'Position', [50 50 800 300])
+set(gca,'fontsize',20)
 
 %% Plot for sig
 figure(1); clf; hold on
