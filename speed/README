@@ -1,0 +1,12 @@
+**********************************************************************
+********************** Speed-amplitude relation **********************
+**********************************************************************
+
+** Within get_diffractons run psystem.py to get the data. 
+   Run measure_speed.py to get txt files with information about the 
+   speed of each diffracton. Copy these files to the folder get_speed. 
+   Run plots_to_paper.py to get the figure about the diffractons in 
+   the mentioned section. The data files needed are included. 
+** Within get_speed run get_speed.m. 
+
+*********************************************************************
