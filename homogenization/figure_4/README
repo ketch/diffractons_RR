@@ -1,0 +1,10 @@
+********************************************************************
+*************** HOMOGENIZED SOLUTION IN C-DISP MEDIA ***************
+********************************************************************
+
+Code to solve the homogenized equations on c-dispersive media. 
+** First be sure the file FV_stress.txt is in the current directory.
+   To generate this file see the subfolder FV_simulation. 
+** Run solver.m and then plotting.m
+
+********************************************************************

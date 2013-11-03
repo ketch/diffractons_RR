@@ -1,0 +1,12 @@
+*********************************************************************
+********** HOMOGENIZED DIFFRACTON ON A SINUSOIDAL MEDIUM ************
+*********************************************************************
+
+Code to generate the homogenized diffracton on a sinusoidal medium in 
+     section Other types of diffractons and diffracton-like waves.
+** Run solver.m to generate the data. 
+   The coefficients in the homogenized equations used in solver.m can 
+   be obtained by running coeff.m
+** Run plotting.m to generate the plot. 
+
+*********************************************************************
