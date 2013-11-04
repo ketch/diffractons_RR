@@ -69,6 +69,15 @@ fig_param = {
         'oscillating_wall' : True,
     } },
 
+'4' : {
+    'description' : """Diffractons for comparison with homogenized solution.""",
+    'frame' : 120,
+    'xshift' : 0,
+    'simulation_params' : {
+        'KA'    : 5./8, 'rhoA'  : 8./5, 'KB'    : 5./2, 'rhoB'  : 2./5,
+        'stress_rel' : 2
+    } },
+
 '5' : {
     'description' : """Generation of a long train of diffractons.""",
     'frame' : 1470,
