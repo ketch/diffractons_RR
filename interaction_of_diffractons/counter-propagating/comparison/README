@@ -1,0 +1,12 @@
+*********************************************************************
+******************** INTERACTION OF DIFFRACTONS *********************
+*********************************************************************
+
+Code to generate the plot comparing different numerical methods and 
+     resolutions in the section Counter-propagating collision.
+** Run plot_to_paper.py to generate the plots in the paper. 
+** Within the folder FV_simulations one can find the code to run 
+   each of the simulations; i.e., sharpclaw on both grids and 
+   clawpack on the finer grid. 
+
+*********************************************************************

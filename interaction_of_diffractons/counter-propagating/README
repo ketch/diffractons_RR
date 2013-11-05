@@ -1,0 +1,23 @@
+*********************************************************************
+******************** INTERACTION OF DIFFRACTONS *********************
+*********************************************************************
+
+Code to generate the results in the section Counter-propagating 
+     collision and animations about it. 
+** Run psystem.py to generate all the data. This is an expensive 
+   simulation; therefore, we include the data to generate the plots 
+   in the mentioned section. 
+** Run plots_to_paper.py to generate the plots in the paper. 
+** Run plots_to_animation.py to generate the plots for an animation. 
+** Run the script make_gifs and/or make_movs to generate animations.
+   To make the animations one has to run psystem.py first. 	     
+   The animations are placed within a folder called animations.
+   To generate these animations one has to install ImageMagick making 
+   sure the delegates GhostScript (to deal with eps files) and ffmpeg 
+   (to generate mov files) are previously installed. With homebrew all 
+   these can be installed by typing:
+    	brew install ghostscript
+	brew install --force ffmpeg
+	brew install --force imagemagick
+
+*********************************************************************
