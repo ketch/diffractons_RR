@@ -2,9 +2,10 @@
 *************** HOMOGENIZED SOLUTION IN C-DISP MEDIA ***************
 ********************************************************************
 
-Code to solve the homogenized equations on c-dispersive media. 
-** First be sure the file FV_stress.txt is in the current directory.
-   To generate this file see the subfolder FV_simulation. 
+Code to solve the homogenized equations in c-dispersive media. 
 ** Run solver.m and then plotting.m
-
+** To generate the finite volume solution in Figure 4, use the 
+   data in pyclaw/saved_data/figure_4 (you can generate this by running
+   pyclaw/reproduce.py and specifying figure 4 if you have enough computing
+   resources).  Run write_y_average.py on the resulting data.
 ********************************************************************
