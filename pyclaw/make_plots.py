@@ -27,7 +27,6 @@ def plot(frame,dirname,outname,field_name='stress',zlimits=[0.,1.],title='',xshi
     x_index_max = field[:,y_index_max].argmax()
     xm = x[x_index_max]
 
-
     plt.figure(figsize=(8,3))
     plt.pcolormesh(xx+xshift,yy,field,cmap=cm.Blues)
     plt.xticks(size=20); plt.yticks(size=20)
@@ -45,8 +44,7 @@ def plot(frame,dirname,outname,field_name='stress',zlimits=[0.,1.],title='',xshi
     plt.ylim([zlimits[0]-0.05*zlimits[1],zlimits[1]*1.05]);
     plt.xlim([xm-50+xshift, xm+15+xshift])
     plt.savefig('./figures/'+outname+'_'+field_name+'_slices.eps')
-    
-    
+        
 def get_extremum(frame,dirname):
     path='./'+dirname
     sol_p=Solution(frame,file_format='petsc',read_aux=False,path=path+'/_p',file_prefix='claw_p')
@@ -54,5 +52,4 @@ def get_extremum(frame,dirname):
     
     sig=sol_p.state.q[0,:]
     eps=sol_q.state.q[0,:]
-    
     return [min(np.min(sig),np.min(eps)), max(np.max(sig),np.max(eps))]

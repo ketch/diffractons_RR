@@ -25,6 +25,7 @@
 """
 from psystem import setup
 import os.path
+import waves_2D_plots
 import make_plots
 
 fig_param = {
@@ -147,14 +148,22 @@ def reproduce_figure(figname, Nx=2, Ny=8, plot=True, use_saved_data=True):
             claw.run()
 
     if plot:
-        zlimits=make_plots.get_extremum(frame,dirname)
-        for field in ('stress','strain'):
-            make_plots.plot(frame,dirname,'fig'+figname,field,zlimits=zlimits,xshift=params['xshift'])
-
-
-
+        if (fig=='14a'):
+            waves_2D_plots.plot(0,'figure_14a',axis_limits=[0.25, 10.25, 0.25, 10.25])
+        elif (fig=='14b'):
+            waves_2D_plots.plot(frame,'figure_14b',clim=[-0.3,0.3])
+        elif (fig=='14c'):
+            waves_2D_plots.plot(65,'figure_14c',clim=[-0.3,0.3])
+        elif (fig=='14d'):
+            waves_2D_plots.plot(65,'figure_14d',clim=[-0.3,0.3])
+        else: 
+            zlimits=make_plots.get_extremum(frame,dirname)
+            for fields in ('stress','strain'):
+                make_plots.plot(frame,dirname,'fig'+figname,fields,zlimits=zlimits,xshift=params['xshift'])
+      
 if __name__=="__main__":
     # Plotting turned off here so you can run in parallel from the command line, i.e.
     # mpiexec -np 8 python reproduce.py
+
     for fig in ('3a','3b','3c','3d','5','14b','14c','14d'):
-        reproduce_figure(fig, plot = False, use_saved_data = False)
+        reproduce_figure(fig, plot = True, use_saved_data = True)
