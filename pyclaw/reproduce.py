@@ -148,13 +148,13 @@ def reproduce_figure(figname, Nx=2, Ny=8, plot=True, use_saved_data=True):
             claw.run()
 
     if plot:
-        if (fig=='14a'):
+        if (figname=='14a'):
             waves_2D_plots.plot(0,'figure_14a',axis_limits=[0.25, 10.25, 0.25, 10.25])
-        elif (fig=='14b'):
+        elif (figname=='14b'):
             waves_2D_plots.plot(frame,'figure_14b',clim=[-0.3,0.3])
-        elif (fig=='14c'):
+        elif (figname=='14c'):
             waves_2D_plots.plot(65,'figure_14c',clim=[-0.3,0.3])
-        elif (fig=='14d'):
+        elif (figname=='14d'):
             waves_2D_plots.plot(65,'figure_14d',clim=[-0.3,0.3])
         else: 
             zlimits=make_plots.get_extremum(frame,dirname)

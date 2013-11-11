@@ -10,7 +10,11 @@ def plot(frame,dirname,clim=None,axis_limits=None):
     if not os.path.exists('./figures'):
         os.makedirs('./figures')
         
-    sol=Solution(frame,file_format='petsc',read_aux=False,path='./saved_data/'+dirname+'/_p/',file_prefix='claw_p')
+    try:
+        sol=Solution(frame,file_format='petsc',read_aux=False,path='./saved_data/'+dirname+'/_p/',file_prefix='claw_p')
+    except IOError:
+        'Data file not found; please unzip the files in saved_data/.'
+        return
     x=sol.state.grid.x.centers; y=sol.state.grid.y.centers
     mx=len(x); my=len(y)
     
