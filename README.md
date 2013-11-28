@@ -12,3 +12,6 @@ Subdirectories:
    (from the *pyclaw* directory).
  - **speed**: Code and data for Figure 6.  Again if you wish to re-generate the
    data, use the code for Figure 5.
+
+Note that the data for Figure 14 has been compressed.  You must uncompress it first
+if you wish to plot it.
