@@ -57,11 +57,11 @@ clf; hold on
 plot(a,s1_absu,'-r','linewidth',2)
 plot(a,s2_absu,'--k','linewidth',2)
 %plot(a,s3_absu,'--c','linewidth',1)
-plot(amplitudes_absu,speeds,'s','linewidth',4)
+plot(amplitudes_absu,speeds,'s','linewidth',2,'markersize',20)
 set(gca,'FontSize',20)
 xlabel('Amplitude','fontsize',20); ylabel('Speed','fontsize',20)
 %legend('linear','quadratic','cubic','location','best')
-legend('linear','quadratic','location','best')
+legend('linear fit','quadratic fit','location','best')
 title('Speed-amplitude','fontsize',20)
 
 %% from original sw and scaled sw
@@ -92,9 +92,9 @@ sig = [sm8 sm7 sm6 sm5 sm4 sm3 sm2 sm1 sig_s1 sig_s2 sig_s3 sig_s4];
 
 figure(2)
 clf; hold on
-plot(amplitudes_absu,[s8 s7 s6 s5 s4 s3 s2 s1],'s','linewidth',4)
-plot(abs([u_s1 u_s2 u_s3 u_s4]),[s_s1 s_s2 s_s3 s_s4],'o','linewidth',4)
-plot(amplitudes,sig./amplitudes,'xr','linewidth',2)
+plot(amplitudes_absu,[s8 s7 s6 s5 s4 s3 s2 s1],'s','linewidth',2,'markersize',20)
+plot(abs([u_s1 u_s2 u_s3 u_s4]),[s_s1 s_s2 s_s3 s_s4],'o','linewidth',2,'markersize',20)
+plot(amplitudes,sig./amplitudes,'xr','linewidth',2,'markersize',15)
 set(gca,'FontSize',20)
 xlabel('Amplitude','fontsize',20); ylabel('Speed','fontsize',20)
 title('Speed-amplitude','fontsize',20)
