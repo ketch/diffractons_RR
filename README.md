@@ -1,5 +1,7 @@
 Reproducibility repository for paper on diffractons
 ====================================================
+Code to accompany the paper 
+[*Diffractons: solitary waves created by diffraction in periodic media*](https://doi.org/10.1137/130946526), by D. I. Ketcheson and M. Quezada de Luna.  Published in SIAM MM&S; the free preprint is also available on the [arXiv](http://arxiv.org/abs/1312.4122).
 
 Subdirectories:
 
